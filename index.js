@@ -1,6 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 const url = require('url');
+const replaceTemplate = require('./modules/replaceTemplate');
 
 ///////////////////////////////////////////////////////////////////////////
 //FILES
@@ -32,20 +33,6 @@ const url = require('url');
 
 ///////////////////////////////////////////////////////////////
 //SERVER
-const replacetemplate = (temp, product) => {
-	let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
-	output = output.replace(/{%IMAGE%}/g, product.image);
-	output = output.replace(/{%FROM%}/g, product.from);
-	output = output.replace(/{%NUTRINENTS%}/g, product.nutrients);
-	output = output.replace(/{%QUANTITY%}/g, product.quantity);
-	output = output.replace(/{%PRICE%}/g, product.price);
-	output = output.replace(/{%DESCRIPTION%}/g, product.description);
-	output = output.replace(/{%ID%}/g, product.id);
-
-	output = output.replace(/{%NOT_ORGANIC%}/g, product.organic ? '' : 'not-organic');
-	return output;
-};
-
 const templateOverview = fs.readFileSync(`${__dirname}/starter/templates/template-overview.html`, 'utf-8');
 const templateProduct = fs.readFileSync(`${__dirname}/starter/templates/template-product.html`, 'utf-8');
 const templateCard = fs.readFileSync(`${__dirname}/starter/templates/template-card.html`, 'utf-8');
@@ -60,7 +47,7 @@ const server = http.createServer((req, res) => {
 	if (pathname === '/' || pathname === '/overview') {
 		res.writeHead(200, { 'Content-type': 'text/html' });
 
-		const cardsHtml = dataObject.map(el => replacetemplate(templateCard, el)).join('');
+		const cardsHtml = dataObject.map(el => replaceTemplate(templateCard, el)).join('');
 		const output = templateOverview.replace('{%PRODUCT_CARDS%}', cardsHtml);
 
 		res.end(output);
@@ -68,7 +55,7 @@ const server = http.createServer((req, res) => {
 	} else if (pathname === '/product') {
 		res.writeHead(200, { 'Content-type': 'text/html' });
 		const product = dataObject[query.id];
-		const output = replacetemplate(templateProduct, product);
+		const output = replaceTemplate(templateProduct, product);
 
 		res.end(output);
 		//API
